@@ -16,6 +16,7 @@ class ImageTab(QWidget):
         grid = QGridLayout()
         self.setLayout(grid)
 
+
         # 툴바
         self.toolbar = QToolBar()
         self.toolbar.addAction(self.zoomInAction)

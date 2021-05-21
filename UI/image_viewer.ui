@@ -20,7 +20,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
-     <layout class="QVBoxLayout" name="verticalLayout">
+     <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,3">
         <item>
@@ -42,7 +42,18 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="2,3">
         <item>
-         <widget class="QListWidget" name="image_list_widget"/>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QLineEdit" name="lineEdit">
+            <property name="placeholderText">
+             <string>Search Image...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QListWidget" name="image_list_widget"/>
+          </item>
+         </layout>
         </item>
         <item>
          <widget class="QTabWidget" name="image_viewer_tab">

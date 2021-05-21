@@ -42,6 +42,8 @@ class MainWindow(QMainWindow, form_class):
     def loadCustomMenu(self):
         self.action_delete_list = QAction(self)
         self.action_delete_list.setText('Delete')
+        self.action_delete_list.triggered.connect(self.actionDeleteList)
+
         self.customMenu = QMenu('Menu', self.image_list_widget)
         self.customMenu.addAction(self.action_delete_list)
 
@@ -60,6 +62,16 @@ class MainWindow(QMainWindow, form_class):
         self.image_viewer_tab.setTabsClosable(True)
         self.image_viewer_tab.tabCloseRequested.connect(self.closeTab)
 
+        # LineEdit
+        self.lineEdit.textChanged.connect(self.editTextChanged)
+
+    def editTextChanged(self):
+        text = self.lineEdit.text()
+        matchItems = self.image_list_widget.findItems(text, Qt.MatchContains)
+        for i in range(self.image_list_widget.count()):
+            it = self.image_list_widget.item(i)
+            it.setHidden(it not in matchItems)
+
 
     def closeTab(self, index):
         if index == 0:
@@ -73,6 +85,7 @@ class MainWindow(QMainWindow, form_class):
         if not index.isValid():
             return
         self.customMenu.popup(QCursor.pos())
+        print('인덱스 : ' + str(index))
 
     def actionClearList(self):
         self.image_list_widget.clear()
@@ -129,12 +142,13 @@ class MainWindow(QMainWindow, form_class):
                 self.label.setPixmap(qPixmapVar)
             # self.label.setPixmap(qPixmapVar.scaled(self.label.width(),self.label.height(),Qt.KeepAspectRatio))
             self.label.setAlignment(Qt.AlignCenter)
-            print('label : '+str(self.label.width())+" "+str(self.label.height()))
             #self.label.resize(qPixmapVar.width(), qPixmapVar.height())
-            print(str(qPixmapVar.width()) + " " + str(qPixmapVar.height()))
         else:
             self.label.setPixmap(QPixmap()) # 선택된 아이템이 없는 경우 이미지 안보이기.
 
+    def actionDeleteList(self):
+        row = self.image_list_widget.currentRow()
+        self.image_list_widget.takeItem(row)
 
     def actionOpenImage(self):
         fileNameTuple = QFileDialog.getOpenFileName(self, 'OpenImage', "","Images (*.png *.xpm *.jpg)")
@@ -145,7 +159,6 @@ class MainWindow(QMainWindow, form_class):
 
     def actionOpenImages(self):
         fileNameTuple = QFileDialog.getOpenFileNames(self, 'OpenImage', "", "Images (*.png *.xpm *.jpg)")
-        print(fileNameTuple)
         fileNameList = fileNameTuple[0]
         for fileName in fileNameList:
             self.image_list_widget.addItem(fileName)

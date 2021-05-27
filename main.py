@@ -65,6 +65,20 @@ class MainWindow(QMainWindow, form_class):
         # LineEdit
         self.lineEdit.textChanged.connect(self.editTextChanged)
 
+        # drag & drop
+        self.setAcceptDrops(True)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self,event):
+        files = [u.toLocalFile() for u in event.mimeData().urls()]
+        for f in files:
+            self.image_list_widget.addItem(f)
+
     def editTextChanged(self):
         text = self.lineEdit.text()
         matchItems = self.image_list_widget.findItems(text, Qt.MatchContains)
@@ -166,15 +180,16 @@ class MainWindow(QMainWindow, form_class):
     def actionOpenFolder(self):
         #fileNameTuple = QFileDialog.getOpenFileNames(self, 'OpenImage', "", "Images (*.png *.xpm *.jpg)")
         dirName = QFileDialog.getExistingDirectory(self, 'Find Folder')
-        fileList = os.listdir(dirName)
-        arr = []
-        for file in fileList:
-            full_filename = os.path.join(dirName, file)
-            ext = os.path.splitext(full_filename)[-1]
-            if ext.lower() == '.png' or ext.lower() == '.jpg':
-                full_filename = full_filename.replace("\\", "/")
-                self.image_list_widget.addItem(full_filename)
-                arr.append(full_filename)
+        if dirName:
+            fileList = os.listdir(dirName)
+            arr = []
+            for file in fileList:
+                full_filename = os.path.join(dirName, file)
+                ext = os.path.splitext(full_filename)[-1]
+                if ext.lower() == '.png' or ext.lower() == '.jpg':
+                    full_filename = full_filename.replace("\\", "/")
+                    self.image_list_widget.addItem(full_filename)
+                    arr.append(full_filename)
 
 
 if __name__ == '__main__':

@@ -6,6 +6,10 @@
 - Image Zoom In
 - Image Zoom Out
 - Open Image on new tab
+- Image Search
 
 ## To Do
-- [ ] Image Search
+- [ ] Image Inpainting
+- [ ] Image Crop
+- [ ] Image Rotation
+- [ ] Image ROI Select

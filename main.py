@@ -1,12 +1,13 @@
 import os
 import sys
-
+import cv2
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from widgets.ImageTab import ImageTab
-
+from widgets.ImageWidget import ImageWidget
+from ImageRestore import ImageRestore
 form_class = uic.loadUiType("UI/image_viewer.ui")[0]
 
 
@@ -36,6 +37,7 @@ class MainWindow(QMainWindow, form_class):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
+        self.imageRestore = ImageRestore()
         self.loadCustomMenu()
         self.setEvent()
 
@@ -44,8 +46,13 @@ class MainWindow(QMainWindow, form_class):
         self.action_delete_list.setText('Delete')
         self.action_delete_list.triggered.connect(self.actionDeleteList)
 
+        self.action_view_list = QAction(self)
+        self.action_view_list.setText('View')
+        self.action_view_list.triggered.connect(self.actionViewList)
+
         self.customMenu = QMenu('Menu', self.image_list_widget)
         self.customMenu.addAction(self.action_delete_list)
+        self.customMenu.addAction(self.action_view_list)
 
     def setEvent(self):
         # MenuBar 버튼 이벤트
@@ -148,21 +155,31 @@ class MainWindow(QMainWindow, form_class):
 
     def chkCurrentItemChanged(self):
         if self.image_list_widget.currentItem():
-            qPixmapVar = QPixmap()
-            qPixmapVar.load(self.image_list_widget.currentItem().text())
-            if qPixmapVar.width()>= self.label.width() or qPixmapVar.height()>=self.label.height():
-                self.label.setPixmap(qPixmapVar.scaled(self.label.width(), self.label.height(), Qt.KeepAspectRatio))
-            else:
-                self.label.setPixmap(qPixmapVar)
-            # self.label.setPixmap(qPixmapVar.scaled(self.label.width(),self.label.height(),Qt.KeepAspectRatio))
+            currentImageName = self.image_list_widget.currentItem().text()
+            qPixmapOrigin = QPixmap()
+            qPixmapOrigin.load(currentImageName)
+            self.label.setPixmap(qPixmapOrigin.scaled(self.label.width()-3, self.label.height()-3, Qt.KeepAspectRatio))
             self.label.setAlignment(Qt.AlignCenter)
-            #self.label.resize(qPixmapVar.width(), qPixmapVar.height())
+            crop_image = self.imageRestore.restore_image(currentImageName)
+            crop_image = crop_image[:, :, ::-1]  # BGR to RGB?
+            h, w, c = crop_image.shape
+            #crop_imageg = QImage(crop_image.data, w, h, w*c, QImage.Format.Format_RGB888)
+            crop_image = QImage(crop_image.data.tobytes(), w, h, c*w,QImage.Format_RGB888)
+            qPixmapCrop = QPixmap.fromImage(crop_image)
+            self.label2.setPixmap(qPixmapCrop.scaled(self.label2.width()-3, self.label.height()-3, Qt.KeepAspectRatio))
+            self.label2.setAlignment(Qt.AlignCenter)
+            #self.label2.setPixmap(QPixmap.fromImage(crop_image))
         else:
             self.label.setPixmap(QPixmap()) # 선택된 아이템이 없는 경우 이미지 안보이기.
 
     def actionDeleteList(self):
         row = self.image_list_widget.currentRow()
         self.image_list_widget.takeItem(row)
+
+    def actionViewList(self):
+        print('view')
+        self.new_view = ImageWidget("images/1.jpg")
+        self.new_view.show()
 
     def actionOpenImage(self):
         fileNameTuple = QFileDialog.getOpenFileName(self, 'OpenImage', "","Images (*.png *.xpm *.jpg)")
